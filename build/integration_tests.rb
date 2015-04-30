@@ -1,5 +1,5 @@
 #  Phusion Passenger - https://www.phusionpassenger.com/
-#  Copyright (c) 2010-2014 Phusion
+#  Copyright (c) 2010-2015 Phusion
 #
 #  "Phusion Passenger" is a trademark of Hongli Lai & Ninh Bui.
 #
@@ -95,8 +95,15 @@ task 'test:integration:native_packaging' do
         "LOCATIONS_INI=/usr/lib/ruby/vendor_ruby/phusion_passenger/locations.ini " +
         command
     elsif PlatformInfo.linux_distro_tags.include?(:redhat)
+      File.read("/etc/redhat-release") =~ /release ([0-9]+)/
+      redhat_major_release = $1.to_i
+      if redhat_major_release >= 7
+        locations_ini = "/usr/share/ruby/vendor_ruby/phusion_passenger/locations.ini"
+      else
+        locations_ini = "/usr/lib/ruby/1.8/phusion_passenger/locations.ini"
+      end
       command = "env NATIVE_PACKAGING_METHOD=rpm " +
-        "LOCATIONS_INI=/usr/lib/ruby/site_ruby/1.8/phusion_passenger/locations.ini " +
+        "LOCATIONS_INI=#{locations_ini} " +
         command
     else
       abort "Unsupported Linux distribution"
